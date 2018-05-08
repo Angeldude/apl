@@ -1,187 +1,43 @@
-$(function($){
-  // Bookmarkable source code
-  var hashParams={}
-  if(location.hash){
-    var a=location.hash.substring(1).split(',')
-    for(var i=0;i<a.length;i++){var b=a[i].split('=');hashParams[b[0]]=unescape(b[1])}
+;(_=>{
+const a=document.body.querySelectorAll('[id]'),I={};for(let i=0;i<a.length;i++)I[a[i].id]=a[i]
+const hp={} // hash params
+if(location.hash){const a=location.hash.substring(1).split(',');for(let i=0;i<a.length;i++){const[k,v]=a[i].split('=')
+                  hp[k]=unescape(v)}}
+I.code.value=hp.code||'';I.code.focus()
+I.perm.onmouseover=I.perm.onfocus=_=>{I.perm.href='#code='+escape(I.code.value);return!1}
+I.go.onclick=_=>{
+  try{const s=I.code.value;I.rslt.classList.remove('err')
+      if(s===')t'){I.rslt.textContent='Running tests...\n';setTimeout(runDocTests,1)}
+      else{I.rslt.textContent=apl.fmt(apl(s)).join('\n')+'\n'}}
+  catch(e){console&&console.error&&console.error(e.stack);I.rslt.classList.add('err');I.rslt.textContent=e}
+  return!1
+}
+hp.run&&I.go.click()
+I.code.focus()
+let bqm=0
+I.code.onkeydown=x=>{
+  const k=x.ctrlKey+2*x.shiftKey+4*x.altKey+8*x.metaKey+100*x.which
+  if(bqm){
+    const e=I.code,i=e.selectionStart,v=e.value,c=bqc[x.key]
+    if(x.which>31){bqm=0;e.classList.remove('bq')}
+    if(c){e.value=v.slice(0,i)+c+v.slice(i);e.selectionStart=e.selectionEnd=i+1;return!1}
   }
-  $('#code').text(hashParams.code||'').focus()
-  $('#permalink').tipsy({gravity:'e',opacity:1,delayIn:1000}).bind('mouseover focus',function(){
-    $(this).attr('href','#code='+escape($('#code').val()));return false
-  })
-
-  function execute(){ // "Execute" button
-    try{
-      var s=$('#code').val()
-      if(s===')t'){
-        $('#result').removeClass('error').text('Running tests...')
-        setTimeout(runDocTests,1)
-      }else{
-        $('#result').removeClass('error').text(apl.format(apl(s)).join('\n')+'\n')
-      }
-    }catch(e){
-      console&&console.error&&console.error(e.stack)
-      $('#result').addClass('error').text(e)
-    }
+  switch(k){
+    case  1301:{I.go.click();return!1} // ctrl-enter
   }
-
-  $('#go').tipsy({gravity:'e',opacity:1,delayIn:1000}).closest('form').submit(function(){execute();return false})
-
-  if(hashParams.run)$('#go').click()
-
-  var hSymbolDefs={
-    '+':'Conjugate, Add',
-    '-':'Negate, Subtract',
-    '×':'Sign of, Multiply',
-    '÷':'Reciprocal, Divide',
-    '⌈':'Ceiling, Greater of',
-    '⌊':'Floor, Lesser of',
-    '∣':'Absolute value, Residue',
-    '⍳':'Index generator, Index of',
-    '?':'Roll, Deal',
-    '*':'Exponential, To the power of',
-    '⍟':'Natural logarithm, Logarithm to the base',
-    '○':'Pi times, Circular and hyperbolic functions',
-    '!':'Factorial, Binomial',
-    '⌹':'Matrix inverse, Matrix divide',
-    '⍠':'Variant operator',
-    '<':'Less than',
-    '≤':'Less than or equal',
-    '=':'Equal',
-    '≥':'Greater than or equal',
-    '>':'Greater than',
-    '≠':'Not equal',
-    '≡':'Depth, Match',
-    '≢':'Tally, Not match',
-    '∊':'Enlist, Membership',
-    '⍷':'Find',
-    '∪':'Unique, Union',
-    '∩':'Intersection',
-    '~':'Not, Without',
-    '∨':'Or (Greatest Common Divisor)',
-    '∧':'And (Least Common Multiple)',
-    '⍱':'Nor',
-    '⍲':'Nand',
-    '⍴':'Shape of, Reshape',
-    ',':'Ravel, Catenate',
-    '⍪':'First axis catenate',
-    '⌽':'Reverse, Rotate',
-    '⊖':'First axis rotate',
-    '⍉':'Transpose',
-    '↑':'First, Take',
-    '↓':'Drop',
-    '⊂':'Enclose, Partition',
-    '⊃':'Mix, Pick',
-    '⌷':'Index',
-    '⍋':'Grade up',
-    '⍒':'Grade down',
-    '⊤':'Encode',
-    '⊥':'Decode',
-    '⍕':'Format, Format by specification',
-    '⍎':'Execute',
-    '⊣':'Stop, Left',
-    '⊢':'Pass, Right',
-    '⎕':'Evaluated input, Output with a newline',
-    '⍞':'Character input, Bare output',
-    '¨':'Each',
-    '∘':'Compose',
-    '/':'Reduce',
-    '⌿':'1st axis reduce',
-    '\\':'Scan',
-    '⍀':'1st axis scan',
-    '⍣':'Power operator',
-    '⍨':'Commute',
-    '¯':'Negative number sign',
-    '∞':'Infinity',
-    '⍝':'Comment',
-    '←':'Assignment',
-    '⍬':'Zilde',
-    '⋄':'Statement separator',
-    '⍺':'Left formal parameter',
-    '⍵':'Right formal parameter',
-    APL:'Press backquote (`) followed by another key to insert an APL symbol, e.g. `r inserts rho (⍴)'
+}
+const get=(x,f)=>{const r=new XMLHttpRequest;r.open('get',x)
+                  r.onreadystatechange=x=>{r.readyState===4&&f(r.responseText)};r.send()}
+,runDocTests=_=>{get('../t.apl',x=>{
+  const t=collectTests(x)
+  I.rslt.classList.remove('err');I.rslt.textContent=''
+  let ne=0,nf=0,t0=+new Date // ne:number of executed, nf:number of failed
+  for(let i=0;i<t.length;i++){
+    ne++;let x=t[i],o=runDocTest(x,apl,apl.aprx)
+    if(o){nf++;I.rslt.textContent+='Test failed: '+JSON.stringify(x[0])+'\n'+
+                                   '             '+JSON.stringify(x[2])+'\n'+
+                                   (o.m?o.m+'\n':'')+(o.e?o.e.stack+'\n':'')}
   }
-
-  // Keyboard
-  var layout={
-    'default':[
-      '` 1 2 3 4 5 6 7 8 9 0 - =',
-      'q w e r t y u i o p [ ] \\',
-      'a s d f g h j k l ; \' {enter}',
-      '{shift} z x c v b n m , . / {bksp}',
-      '{alt} {space} {exec!!}'
-    ],
-    shift:[
-      '~ ! @ # $ % ^ & * ( ) _ +',
-      'Q W E R T Y U I O P { } |',
-      'A S D F G H J K L : " {enter}',
-      '{shift} Z X C V B N M < > ? {bksp}',
-      '{alt} {space} {exec!!}'
-    ],
-    alt:[
-      '{empty} ¨ ¯ < ≤ = ≥ > ≠ ∨ ∧ ÷ ×',
-      '{empty} ⍵ ∊ ⍴ ~ ↑ ↓ ⍳ ○ ⍟ ← → ⍀',
-      '⍺ ⌈ ⌊ ⍫ ∇ ∆ ∘ {empty} ⎕ ⋄ {empty} {enter}',
-      '{shift} ⊂ ⊃ ∩ ∪ ⊥ ⊤ ∣ ⍪ {empty} ⌿ {bksp}',
-      '{alt} {space} {exec!!}'
-    ],
-    'alt-shift':[
-      '⍨ ∞ ⍁ ⍂ ⍠ ≈ ⌸ ⍯ ⍣ ⍱ ⍲ ≢ ≡',
-      '⌹ ⍹ ⍷ ⍤ {empty} ⌶ ⊖ ⍸ ⍬ ⌽ ⊣ ⊢ ⍉',
-      '⍶ {empty} {empty} {empty} ⍒ ⍋ ⍝ {empty} ⍞ {empty} {empty} {enter}',
-      '{shift} ⊆ ⊇ ⋔ ⍦ ⍎ ⍕ ⌷ « » ↗ {bksp}',
-      '{alt} {space} {exec!!}'
-    ]
-  }
-
-  // Key mappings
-  var combos={'`':{}}
-  var asciiKeys=layout['default'].concat(layout.shift).join(' ').split(' ')
-  var aplKeys=layout.alt.concat(layout['alt-shift']).join(' ').split(' ')
-  for(var i=0;i<asciiKeys.length;i++){
-    var k=asciiKeys[i],v=aplKeys[i]
-    if(!/^\{\w+\}$/.test(k)&&!/^\{\w+\}$/.test(v))combos['`'][k]=v
-  }
-
-  $.keyboard.keyaction.exec=execute
-  $.keyboard.defaultOptions.combos={}
-  $.keyboard.comboRegex=/(`)(.)/mig
-  $('textarea').keyboard({
-    layout:'custom',useCombos:false,autoAccept:true,usePreview:false,customLayout:layout,useCombos:true,combos:combos,
-    display:{bksp:'Bksp',shift:'⇧',alt:'APL',enter:'Enter',exec:'⍎'}
-  })
-
-  $('textarea').addTyping().focus()
-
-  $('#code').keydown(function(e){if(e.keyCode===13&&e.ctrlKey){$('#go').click();return false}})
-
-  var tipsyOpts={gravity:'s',delayIn:1000,opacity:1,title:function(){return hSymbolDefs[$(this).text()]||''}}
-  $('.ui-keyboard').on('mouseover', '.ui-keyboard-button', function(event) {
-    var $b = $(event.target).closest('.ui-keyboard-button')
-    if(!$b.data('tipsyInitialised'))$b.data('tipsyInitialised',1).tipsy(tipsyOpts).tipsy('show')
-    return false
-  })
-
-  // Tests
-  function runDocTests(){
-    $('#result').removeClass('error').html('')
-    var nExecuted=0,nFailed=0,t0=+new Date
-    for(var i=0;i<aplTests.length;i++){
-      var x=aplTests[i],code=x[0],mode=x[1],expectation=x[2]
-      nExecuted++
-      var outcome=runDocTest([code,mode,expectation],apl,apl.approx)
-      if(!outcome.success){
-        nFailed++
-        var s='Test failed: '+JSON.stringify(code)+'\n'+
-              '             '+JSON.stringify(expectation)+'\n'
-        if(outcome.reason)s+=outcome.reason+'\n'
-        if(outcome.error)s+=outcome.error.stack+'\n'
-        $('#result').text($('#result').text()+s)
-      }
-    }
-    $('#result').text($('#result').text()+(
-      (nFailed?nFailed+' out of '+nExecuted+' tests failed':'All '+nExecuted+' tests passed')+
-      ' in '+(new Date-t0)+' ms.\n'
-    ))
-  }
-})
+  I.rslt.textContent+=(nf?nf+' out of '+ne+' tests failed':'All '+ne+' tests passed')+' in '+(new Date-t0)+' ms.\n'
+})}
+})();

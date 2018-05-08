@@ -1,25 +1,28 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset=UTF-8>
-<title>ngn/apl demo</title>
-<style>@import url(../web/index.css);@import url(../web/keyboard.css);@import url(../web/tipsy.css);</style>
-</head>
-<body>
-<a id=linkToMobile href=../m/index.html>mobile version</a>
-<h1><a href='https://github.com/ngn/apl#readme'>ngn/apl</a> demo</h1>
-<a id=permalink href=# title='A bookmarkable link to the source code below'>#permalink</a>
-<a href='https://github.com/ngn/apl/tree/master/examples' target=_blank>examples</a>
-<form><p><textarea id=code></textarea><input id=go type=submit value=⍎ title='Execute code (ctrl-Enter)'></p></form>
-<div id=result></div>
-<script src='../apl.js'                          ></script>
-<script src='jquery.min.js'                      ></script>
-<script src='jquery.fieldselection.min.js'       ></script>
-<script src='jquery.keyboard.js'                 ></script>
-<script src='jquery.keyboard.extension-typing.js'></script>
-<script src='jquery.tipsy.js'                    ></script>
-<script src='index.js'                           ></script>
-<script src='../test/rundoctest.js'              ></script>
-<!--todo: <script>var aplTests=`node test/collectdoctests.js</script> -->
+<html><head><meta charset=utf-8><title>ngn/apl</title><style>
+@font-face{font-family:a;src:url(Apl385.woff)format('woff');}
+/* http://www.apl385.com/fonts/index.htm as of 2017-08-10 says:
+"All fonts listed on this page are original artwork by Adrian Smith, and are freely placed into the public domain." */
+body,textarea,input{font-family:a,monospace}
+a{color:#008;text-decoration:none}
+a:hover{text-decoration:underline}
+#code{width:100%;outline:none}
+#go{float:right;width:64px}
+#rslt{margin-top:16px;white-space:pre}
+#rslt.err{color:red}
+</style></head><body>
+<span style=float:right>
+ <a href='javascript:(d=>{let e=d.createElement("script");e.src="https://ngn.github.io/apl/web/lb.js";d.body.appendChild(e)})(document)'
+    id=lbbm title='bookmarklet - language bar in (almost) any web page'>lb</a>
+ <a id=perm href=# title='bookmarkable link to the APL code below'>#</a>
+</span>
+<a id=logo href=https://github.com/ngn/apl#readme title='project home at github'>ngn/apl</a>
+<textarea id=code rows=8 autofocus></textarea>
+<input id=go type=submit value=⍎ title='Execute (Ctrl-Enter)'>
+<div id=rslt></div>
+<script src=../apl.js></script>
+<script src=../t.js  ></script>
+<script src=index.js ></script>
+<script src=lb.js    ></script>
 </body>
 </html>
